@@ -23,11 +23,11 @@ sh$> pip install .
 Please report bugs, feature requests, and questions through the [Issues](https://github.com/malcolmw/pykonal/issues "PyKonal Issues tracker") tracker.
 
 ## Py for GNSS-A
-Cartesian_3Dfig3.py: 直交座標系の音響伝播計算
-Spherical_3Dfig5.py: 球座標系の音響伝播計算（半径6371kmの球の表面5kmの球殻のみ計算される）
-Path_fig1.py: 音響パスの計算（震源と受信点を拘束するのは難しくまだできていない）
-VV.py: 傾斜パラメータが与えられるときの場を計算する（横田，2019，海洋音響学会誌）
-mksvp.py: SVモデル作成用
+1. Cartesian_3Dfig3.py: 直交座標系の音響伝播計算
+2. Spherical_3Dfig5.py: 球座標系の音響伝播計算（半径6371kmの球の表面5kmの球殻のみ計算される）
+3. Path_fig1.py: 音響パスの計算（震源と受信点を拘束するのは難しくまだできていない）
+4. VV.py: 傾斜パラメータが与えられるときの場を計算する（横田，2019，海洋音響学会誌）
+5. mksvp.py: SVモデル作成用
 
 ## References
 1. Sethian, J. A. (1996). A fast marching level set method for monotonically advancing fronts. *Proceedings of the National Academy of Sciences, 93*(4), 1591–1595. https://doi.org/10.1073/pnas.93.4.1591
