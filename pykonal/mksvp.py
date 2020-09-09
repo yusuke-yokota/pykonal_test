@@ -18,8 +18,20 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 #Set the velocity gradient in 1/s
 sv = pd.read_csv('svpA.csv')
-svX= [[] for i in range(10000)]
+dpX = np.arange(10000, dtype = 'float64')
+svX = np.arange(10000, dtype = 'float64')
+dvX = np.arange(10000, dtype = 'float64')
 print(len(sv.speed))
-#for i in range(len(sv.speed)-1):
-#  for t in range(10):
-#    svX[i*10+t]=(sv.speed[i]*(10-t)+sv.speed[i+1]*t)*0.1
+pd.options.display.float_format = '{:.5f}'.format
+spli=20
+for i in range(len(sv.speed)-1):
+  for t in range(spli):
+#    dpX[i*spli+t]=100.*float(i)+100.*float(t)/float(spli)
+#    svX[i*spli+t]=(sv.speed[i]*float(spli-t)+sv.speed[i+1]*float(t))/float(spli)
+    dpX[i*spli+t]=100.*i+100.*t/spli
+    X=(sv.speed[i]*(spli-t)+sv.speed[i+1]*t)/spli
+    svX[i*spli+t]=X
+    dvX[i*spli+t]=1.0
+df = pd.DataFrame({ 'depth' : dpX,'speed' : svX,'degree_of_varience_in_svinv' : dvX}, dtype="float64")
+df = df.set_index('depth')
+df.to_csv('out.csv')

@@ -1,5 +1,5 @@
 # pykonal_test
-This code was modified by PyKonal, the Fast Marching Method (FMM; Sethian *et al.*, 1996) for solving the eikonal equation in Cartesian or spherical coordinates in 2 or 3 dimensions. The method implements mixed first- and second-order finite differences.
+This code was modified by PyKonal, the Fast Marching Method (FMM; Sethian, 1996) for solving the eikonal equation in Cartesian or spherical coordinates in 2 or 3 dimensions. The method implements mixed first- and second-order finite differences.
 ## Citation
 If you make use of this code in published work, please cite White *et al.* (2020).
 

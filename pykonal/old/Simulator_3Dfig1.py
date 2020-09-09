@@ -10,12 +10,15 @@ import pandas as pd
 import numpy as np
 import pykonal
 import os,time,sys
-from scipy.interpolate import Rbf
-import colorednoise as cn
+from scipy.interpolate import RegularGridInterpolator as rgi
 
 t1 = time.time() 
 ##
 sv = pd.read_csv('svpC.csv')
+##
+vepo = pd.read_csv('vepo.csv')
+Vi = my_interpolating_function(vepo)
+
 ##
 # Initialize the solver.
 #m_s_dp=[   3,   6,   30]
@@ -23,7 +26,7 @@ sv = pd.read_csv('svpC.csv')
 
 #m_s_dp=[   10,   20,   30]
 #m_s_km=[ 108.0, 0.0,  0.0] # cm/s/km
-m_s_dp=[    9,   21,   30]
+m_s_dp=[    900,   2100,   3000]
 m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
 #m_s_km=[ -50.3, 307.5,  0.0] # cm/s/km
@@ -40,9 +43,9 @@ m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_km=[ 307.5,-812.5,  0.0] # cm/s/km
 #m_s_dpB=[   23,   24,   30]
 #m_s_kmB=[ 86.9,-702.0,  0.0] # cm/s/km
-nlat,ndep,nlon=100,50,100#8000,8000,4000
-dlat,ddep,dlon=0.1,0.1,0.1
-slat,sdep,slon=50,30,50
+nlat,ndep,nlon=10000,5000,10000#8000,8000,4000
+dlat,ddep,dlon=0.001,0.001,0.001
+slat,sdep,slon=5000,3000,5000
 solverb = pykonal.EikonalSolver(coord_sys="cartesian")
 solverc = pykonal.EikonalSolver(coord_sys="cartesian")
 
@@ -106,11 +109,13 @@ solverc.solve()
 ### Plot the results
 plt.close('all')
 fig = plt.figure(figsize=(5, 7.5))
+#fig = plt.figure(figsize=(5, 4.25))
 ax = fig.add_subplot(1, 1, 1, frameon=False)
 plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 ax.set_xlabel("Eastward offset [km]")
 ax.set_ylabel("Northward offset [km]                             Downward offset [km]")
 gridspec = gs.GridSpec(nrows=4, ncols=1, height_ratios=[0.04,0.32,0.06,1.05])
+#gridspec = gs.GridSpec(nrows=4, ncols=1, height_ratios=[0.04,0.3,0.04,0.3])
 cax00 = fig.add_subplot(gridspec[0, 0])
 cax01 = fig.add_subplot(gridspec[2, 0])
 ax10 = fig.add_subplot(gridspec[1, 0])
@@ -120,8 +125,7 @@ panel = ord("a")
 for ax in (ax10, ax11):
     ax.text(-0.05, 0.8, f"({chr(panel)})", ha="right", va="top", transform=ax.transAxes)
     panel += 1
-tt0 = solverb.traveltime.values # - solverb.traveltime.values
-#tt0 = solverc.traveltime.values - solverb.traveltime.values
+tt0 = solverc.traveltime.values - solverb.traveltime.values
 #tt1 = solverd.traveltime.values - solverc.traveltime.values
 qmesh = ax10.pcolormesh(
     solverc.velocity.nodes[:,:,0,0],
@@ -130,6 +134,15 @@ qmesh = ax10.pcolormesh(
     cmap=plt.get_cmap("seismic"),
     norm=Normalize(vmin=-0.1, vmax=0.1)
 )
+#qmesh = ax10.pcolormesh(
+##    solverc.velocity.nodes[:,0,:,0],
+##    solverc.velocity.nodes[:,0,:,2],
+##    solverc.velocity.values[:,31,:],
+#    solverc.velocity.nodes[:,:,0,0],
+#    solverc.velocity.nodes[:,:,0,1],
+#    tt0[:,:,int(nlon/2)],
+#    cmap=plt.get_cmap("hot"),
+#)
 ax10.set_ylim(0,3)
 ax10.invert_yaxis()
 cbar = fig.colorbar(qmesh, cax=cax00, orientation="horizontal", ticks=[-0.1,-0.05,0,0.05,0.1])
@@ -156,7 +169,7 @@ ax11.contour(
     linestyles="--"
 )
 #print(tt0[:,0,50])
-np.savetxt('centerline.csv',tt0[:,0,50],delimiter=',')
+np.savetxt('centerline.csv',tt0[:,0,5000],delimiter=',')
 #np.savetxt('line1500.csv',tt0[:,0,65],delimiter=',')
 ax11.plot([5, 5], [2, 8], 'w-', lw=2)
 ax11.plot([2, 8], [5, 5], 'w-', lw=2)
@@ -172,63 +185,4 @@ cbar.set_clim(-0.005,0.005)
 #cbar.ax.xaxis.tick_top()
 #cbar.ax.xaxis.set_label_position("top")
 plt.savefig('figure.png')
-#shutil.copyfile("figure.png", "/mnt/owncloud_webdav/webdav/figure.png")
-#################################
-#################################
-xn=solverb.traveltime.nodes[15:86,0:4,15:86,0].reshape(-1,)
-yn=solverb.traveltime.nodes[15:86,0:4,15:86,1].reshape(-1,)
-zn=solverb.traveltime.nodes[15:86,0:4,15:86,2].reshape(-1,)
-tn=tt0[15:86,0:4,15:86].reshape(-1,)
-rbfi = Rbf(xn,yn,zn,tn)
-#################################
-lhptb  = 0.05000 #(km-order)
-lnptb  = 0.00250 #(km-order)
-lzptb  = 0.00250 #(km-order)
-ghptb  = 0.00001 #(km-order)
-gvptb  = 0.00003 #(km-order)
-#################################
-lknot  = 7.0*1.852
-beta10 = 1.0
-beta15 = 1.5
-beta20 = 2.0
-#################################
-ld     = pd.read_csv('linesample.csv')
-for n in range(len(ld['se'])):
-  lstart = np.array([ld['se'][n],ld['sn'][n],ld['su'][n]])
-  lend   = np.array([ld['ee'][n],ld['en'][n],ld['eu'][n]])
-  line   = lend-lstart
-  kyori  = np.linalg.norm(line)
-  ltime  = int(3600.*kyori/lknot)+30
-  gpe = cn.powerlaw_psd_gaussian(beta15, ltime)
-  gpe = gpe - np.average(gpe)
-  gpn = cn.powerlaw_psd_gaussian(beta15, ltime)
-  gpn = gpn - np.average(gpn)
-  gpu = cn.powerlaw_psd_gaussian(beta15, ltime)
-  gpu = gpu - np.average(gpu)
-  l_e = cn.powerlaw_psd_gaussian(beta20, ltime)
-  l_e = l_e - np.average(l_e)
-  l_n = cn.powerlaw_psd_gaussian(beta20, ltime)
-  l_n = l_n - np.average(l_n)
-  l_z = cn.powerlaw_psd_gaussian(beta10, ltime)
-  l_z = l_z - np.average(l_z)
-#np.savetxt('test_dit.csv',l_h,delimiter=',')
-#################################
-  ang = math.atan2(ld['ee'][n]-ld['se'][n],ld['en'][n]-ld['sn'][n])
-  sewr =                   (np.cos(ang)*lhptb+np.sin(ang)*lnptb)*l_e[::10]+np.linspace(lstart[0],lend[0],len(l_e[::10]))
-  sewn = ghptb*gpe[::10] + sewr
-  snsr =                   (np.sin(ang)*lhptb+np.cos(ang)*lnptb)*l_n[::10]+np.linspace(lstart[1],lend[1],len(l_e[::10]))
-  snsn = ghptb*gpn[::10] + snsr
-  sudr =                                                   lzptb*l_z[::10]+np.linspace(lstart[2],lend[2],len(l_e[::10]))
-  sudn = gvptb*gpu[::10] + sudr
-  sdi = rbfi(sewr, sudr, snsr)
-#################################
-  rewr = sewr + sdi*lknot*(ld['ee'][n]-ld['se'][n])/(3600.*kyori) + (np.cos(ang)*lhptb+np.sin(ang)*lnptb)*l_e[3::10]
-  rewn = ghptb*gpe[3::10]+ rewr
-  rnsr = snsr + sdi*lknot*(ld['en'][n]-ld['sn'][n])/(3600.*kyori) + (np.sin(ang)*lhptb+np.cos(ang)*lnptb)*l_n[3::10]
-  rnsn = ghptb*gpn[3::10]+ rnsr
-  rudr = lzptb*l_z[3::10]+np.linspace(lstart[2],lend[2],len(l_e[::10]))
-  rudn = gvptb*gpu[3::10]+ rudr
-  rdi = rbfi(rewr, rudr, rnsr)
-#################################
-  df = pd.DataFrame({'sEW': sewr,'sNS': snsr,'sUD': sudr,'sEWn': sewn,'sNSn': snsn,'sUDn': sudn,'sTT': sdi,'rEW': rewr,'rNS': rnsr,'rUD': rudr,'rEWn': rewn,'rNSn': rnsn,'rUDn': rudn,'rTT': rdi})
-  df.to_csv('test_li_%s.csv'%(str(n).zfill(2)))
+shutil.copyfile("figure.png", "/mnt/owncloud_webdav/webdav/figure.png")

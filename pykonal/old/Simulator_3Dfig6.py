@@ -21,10 +21,14 @@ sv = pd.read_csv('svpC.csv')
 #m_s_dp=[   3,   6,   30]
 #m_s_km=[ -72.0, 504.0,  0.0] # cm/s/km
 
-#m_s_dp=[   10,   20,   30]
+#m_s_dp=[  40,  80, 120]
+m_s_dp=[  10,  20,  30]
+m_s_km=[  0.0, 0.0,  0.0] # cm/s/km
 #m_s_km=[ 108.0, 0.0,  0.0] # cm/s/km
-m_s_dp=[    9,   21,   30]
-m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
+#m_s_dp=[    9,   21,   30]
+#m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
+#m_s_dp=[   36,   84,  120]
+#m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
 #m_s_km=[ -50.3, 307.5,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
@@ -40,9 +44,15 @@ m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_km=[ 307.5,-812.5,  0.0] # cm/s/km
 #m_s_dpB=[   23,   24,   30]
 #m_s_kmB=[ 86.9,-702.0,  0.0] # cm/s/km
-nlat,ndep,nlon=100,50,100#8000,8000,4000
-dlat,ddep,dlon=0.1,0.1,0.1
-slat,sdep,slon=50,30,50
+#nlat,ndep,nlon=100,51,100#8000,8000,4000
+#dlat,ddep,dlon=0.02,0.02,0.02
+#slat,sdep,slon=50,50,50
+nlat,ndep,nlon=200,101,200#8000,8000,4000
+dlat,ddep,dlon=0.01,0.01,0.01
+slat,sdep,slon=100,100,100
+#nlat,ndep,nlon=400,201,400#8000,8000,4000
+#dlat,ddep,dlon=0.005,0.005,0.005
+#slat,sdep,slon=200,200,200
 solverb = pykonal.EikonalSolver(coord_sys="cartesian")
 solverc = pykonal.EikonalSolver(coord_sys="cartesian")
 
@@ -57,7 +67,7 @@ solverb.velocity.npts = nlat, ndep, nlon
 #solverb.velocity.values = np.array([[[1.480554] * nlon] * ndep] * nlat)
 svd = [[] for i in range(ndep)]
 for i in range(ndep):
-  svd[i] = np.array([sv.speed[i]*0.001] * nlon)
+  svd[i] = np.array([(sv.speed[i]+10.)*0.001] * nlon)
 svp = [svd[0]]
 for i in range(1,ndep):
   svp = np.append(svp, [svd[i]], axis=0)
@@ -78,13 +88,13 @@ svp  = [[] for s in range(nlat)]
 for s in range(nlat):
   svc = [[] for i in range(ndep)]
   for i in range(0,m_s_dp[0]):
-    svc[i] = np.array([m_s_km[0]*0.001*0.01*0.1*float(s-50)] * nlon)
+    svc[i] = np.array([m_s_km[0]*0.001*0.1*(1./float(nlat))*float(s-slat)] * nlon)
 #    svc[i] = np.array([0] * nlon)
   for i in range(m_s_dp[0],m_s_dp[1]):
-    svc[i] = np.array([m_s_km[1]*0.001*0.01*0.1*float(s-50)] * nlon)
+    svc[i] = np.array([m_s_km[1]*0.001*0.1*(1./float(nlat))*float(s-slat)] * nlon)
 #    svc[i] = np.array([0] * nlon)
   for i in range(m_s_dp[1],ndep):
-    svc[i] = np.array([m_s_km[2]*0.001*0.01*0.1*float(s-50)] * nlon)
+    svc[i] = np.array([m_s_km[2]*0.001*0.1*(1./float(nlat))*float(s-slat)] * nlon)
 #    svc[i] = np.array([0] * nlon)
   svp[s] = [svc[0]]
   for i in range(1,ndep):
@@ -120,8 +130,9 @@ panel = ord("a")
 for ax in (ax10, ax11):
     ax.text(-0.05, 0.8, f"({chr(panel)})", ha="right", va="top", transform=ax.transAxes)
     panel += 1
-tt0 = solverb.traveltime.values # - solverb.traveltime.values
-#tt0 = solverc.traveltime.values - solverb.traveltime.values
+ttm = solverb.traveltime.values # - solverb.traveltime.values
+ttc = solverc.traveltime.values # - solverb.traveltime.values
+tt0 = solverc.traveltime.values - solverb.traveltime.values
 #tt1 = solverd.traveltime.values - solverc.traveltime.values
 qmesh = ax10.pcolormesh(
     solverc.velocity.nodes[:,:,0,0],
@@ -130,7 +141,7 @@ qmesh = ax10.pcolormesh(
     cmap=plt.get_cmap("seismic"),
     norm=Normalize(vmin=-0.1, vmax=0.1)
 )
-ax10.set_ylim(0,3)
+ax10.set_ylim(0,1)
 ax10.invert_yaxis()
 cbar = fig.colorbar(qmesh, cax=cax00, orientation="horizontal", ticks=[-0.1,-0.05,0,0.05,0.1])
 cbar.set_label("d-Velocity [m/s]")
@@ -156,15 +167,17 @@ ax11.contour(
     linestyles="--"
 )
 #print(tt0[:,0,50])
-np.savetxt('centerline.csv',tt0[:,0,50],delimiter=',')
+np.savetxt('centerline.csv',tt0[:,0,slon],delimiter=',')
 #np.savetxt('line1500.csv',tt0[:,0,65],delimiter=',')
-ax11.plot([5, 5], [2, 8], 'w-', lw=2)
-ax11.plot([2, 8], [5, 5], 'w-', lw=2)
-ax11.plot([5-3/math.sqrt(2), 5+3/math.sqrt(2)], [5-3/math.sqrt(2), 5+3/math.sqrt(2)], 'w-', lw=2)
-ax11.plot([5-3/math.sqrt(2), 5+3/math.sqrt(2)], [5+3/math.sqrt(2), 5-3/math.sqrt(2)], 'w-', lw=2)
-ax11.plot([5, 8, 5, 2, 5], [2, 5, 8, 5, 2], 'w-', lw=2)
-ax11.plot([5, 6.5, 5, 3.5, 5], [3.5, 5, 6.5, 5, 3.5], 'w-', lw=2)
-ax11.plot(5, 5.0, marker='*',markersize=4)
+ax11.plot([1, 1], [0, 2], 'w-', lw=2)
+ax11.plot([0, 2], [1, 1], 'w-', lw=2)
+ax11.plot([1-1/math.sqrt(2), 1+1/math.sqrt(2)], [1-1/math.sqrt(2), 1+1/math.sqrt(2)], 'w-', lw=2)
+ax11.plot([1-1/math.sqrt(2), 1+1/math.sqrt(2)], [1+1/math.sqrt(2), 1-1/math.sqrt(2)], 'w-', lw=2)
+ax11.plot([1, 2, 1, 0, 1], [0, 1, 2, 1, 0], 'w-', lw=2)
+ax11.plot([1, 1.5, 1, 0.5, 1], [0.5, 1, 1.5, 1, 0.5], 'w-', lw=2)
+ax11.plot(1, 1.0, marker='*',markersize=4)
+ax11.set_xlim([0,2])
+ax11.set_ylim([0,2])
 cbar = fig.colorbar(qmesh, cax=cax01, orientation="horizontal", ticks=[-0.005,0.0,0.005])
 #cbar = fig.colorbar(qmesh, cax=cax01, orientation="horizontal", ticks=[-0.01,-0.005,0,0.005,0.01])
 cbar.set_label("")
@@ -172,20 +185,28 @@ cbar.set_clim(-0.005,0.005)
 #cbar.ax.xaxis.tick_top()
 #cbar.ax.xaxis.set_label_position("top")
 plt.savefig('figure.png')
-#shutil.copyfile("figure.png", "/mnt/owncloud_webdav/webdav/figure.png")
+shutil.copyfile("figure.png", "/mnt/owncloud_webdav/webdav/figureD8.png")
 #################################
 #################################
-xn=solverb.traveltime.nodes[15:86,0:4,15:86,0].reshape(-1,)
-yn=solverb.traveltime.nodes[15:86,0:4,15:86,1].reshape(-1,)
-zn=solverb.traveltime.nodes[15:86,0:4,15:86,2].reshape(-1,)
-tn=tt0[15:86,0:4,15:86].reshape(-1,)
+#xn=solverb.traveltime.nodes[50:150,0:4,50:150,0].reshape(-1,)
+#yn=solverb.traveltime.nodes[50:150,0:4,50:150,1].reshape(-1,)
+#zn=solverb.traveltime.nodes[50:150,0:4,50:150,2].reshape(-1,)
+xn=solverb.traveltime.nodes[:,0,slon,0].reshape(-1,)
+yn=solverb.traveltime.nodes[:,0,slon,1].reshape(-1,)
+zn=solverb.traveltime.nodes[:,0,slon,2].reshape(-1,)
+tn=ttc[:,0,slon].reshape(-1,)
+t0=np.sqrt((xn-1)**2+(yn-1)**2+(zn-1)**2)/1.51
+df = pd.DataFrame({'a':xn,'b':yn,'c':zn,'d':tn,'e':t0})
+df.to_csv('test_li_00.csv')
+shutil.copyfile("test_li_00.csv", "/mnt/owncloud_webdav/webdav/test_li_11.csv")
+stop
 rbfi = Rbf(xn,yn,zn,tn)
 #################################
-lhptb  = 0.05000 #(km-order)
-lnptb  = 0.00250 #(km-order)
-lzptb  = 0.00250 #(km-order)
-ghptb  = 0.00001 #(km-order)
-gvptb  = 0.00003 #(km-order)
+lhptb  = 0.0 #5000 #(km-order)
+lnptb  = 0.0 #0250 #(km-order)
+lzptb  = 0.0 #0250 #(km-order)
+ghptb  = 0.0 #0001 #(km-order)
+gvptb  = 0.0 #0003 #(km-order)
 #################################
 lknot  = 7.0*1.852
 beta10 = 1.0
@@ -228,7 +249,10 @@ for n in range(len(ld['se'])):
   rnsn = ghptb*gpn[3::10]+ rnsr
   rudr = lzptb*l_z[3::10]+np.linspace(lstart[2],lend[2],len(l_e[::10]))
   rudn = gvptb*gpu[3::10]+ rudr
-  rdi = rbfi(rewr, rudr, rnsr)
+  rdi  = np.sqrt((sewr-1)**2+(snsr-1)**2+(sudr-1)**2)/1.5
+#  rdi = rbfi(rewr, rudr, rnsr)
 #################################
   df = pd.DataFrame({'sEW': sewr,'sNS': snsr,'sUD': sudr,'sEWn': sewn,'sNSn': snsn,'sUDn': sudn,'sTT': sdi,'rEW': rewr,'rNS': rnsr,'rUD': rudr,'rEWn': rewn,'rNSn': rnsn,'rUDn': rudn,'rTT': rdi})
+#  df = pd.DataFrame({'sEW': sewr,'sNS': snsr,'sUD': sudr,'sEWn': sewn,'sNSn': snsn,'sUDn': sudn,'sTT': sdi,'rEW': rewr,'rNS': rnsr,'rUD': rudr,'rEWn': rewn,'rNSn': rnsn,'rUDn': rudn,'rTT': rdi})
   df.to_csv('test_li_%s.csv'%(str(n).zfill(2)))
+shutil.copyfile("test_li_00.csv", "/mnt/owncloud_webdav/webdav/test_li_00.csv")

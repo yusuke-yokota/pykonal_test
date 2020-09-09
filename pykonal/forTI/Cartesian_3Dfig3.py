@@ -21,10 +21,10 @@ sv = pd.read_csv('svpC.csv')
 #m_s_dp=[   3,   6,   30]
 #m_s_km=[ -72.0, 504.0,  0.0] # cm/s/km
 
-#m_s_dp=[   10,   20,   30]
-#m_s_km=[ 108.0, 0.0,  0.0] # cm/s/km
-m_s_dp=[    9,   21,   30]
-m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
+m_s_dp=[   10,   20,   30]
+m_s_km=[ 108.0, 0.0,  0.0] # cm/s/km
+#m_s_dp=[    9,   21,   30]
+#m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
 #m_s_km=[ -50.3, 307.5,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
@@ -120,23 +120,23 @@ panel = ord("a")
 for ax in (ax10, ax11):
     ax.text(-0.05, 0.8, f"({chr(panel)})", ha="right", va="top", transform=ax.transAxes)
     panel += 1
-tt0 = solverb.traveltime.values # - solverb.traveltime.values
-#tt0 = solverc.traveltime.values - solverb.traveltime.values
+#tt0 = solverb.traveltime.values # - solverb.traveltime.values
+tt0 = solverc.traveltime.values - solverb.traveltime.values
 #tt1 = solverd.traveltime.values - solverc.traveltime.values
 qmesh = ax10.pcolormesh(
     solverc.velocity.nodes[:,:,0,0],
     solverc.velocity.nodes[:,:,0,1],
-    a1[:,:,int(nlon/2)]*10.,
+    a1[:,:,int(nlon/2)]*1000.,
     cmap=plt.get_cmap("seismic"),
-    norm=Normalize(vmin=-0.1, vmax=0.1)
+    norm=Normalize(vmin=-10, vmax=10)
 )
 ax10.set_ylim(0,3)
 ax10.invert_yaxis()
-cbar = fig.colorbar(qmesh, cax=cax00, orientation="horizontal", ticks=[-0.1,-0.05,0,0.05,0.1])
+cbar = fig.colorbar(qmesh, cax=cax00, orientation="horizontal", ticks=[-10,-5,0,5,10])
 cbar.set_label("d-Velocity [m/s]")
 cbar.ax.xaxis.tick_top()
 cbar.ax.xaxis.set_label_position("top")
-cbar.set_clim(-0.1,0.1)
+cbar.set_clim(-10,10)
 qmesh = ax11.pcolormesh(
     solverb.traveltime.nodes[:,0,:,0],
     solverb.traveltime.nodes[:,0,:,2],
@@ -155,8 +155,7 @@ ax11.contour(
     linewidths=0.2,
     linestyles="--"
 )
-#print(tt0[:,0,50])
-np.savetxt('centerline.csv',tt0[:,0,50],delimiter=',')
+#np.savetxt('centerline.csv',tt0[:,0,50],delimiter=',')
 #np.savetxt('line1500.csv',tt0[:,0,65],delimiter=',')
 ax11.plot([5, 5], [2, 8], 'w-', lw=2)
 ax11.plot([2, 8], [5, 5], 'w-', lw=2)
@@ -166,69 +165,9 @@ ax11.plot([5, 8, 5, 2, 5], [2, 5, 8, 5, 2], 'w-', lw=2)
 ax11.plot([5, 6.5, 5, 3.5, 5], [3.5, 5, 6.5, 5, 3.5], 'w-', lw=2)
 ax11.plot(5, 5.0, marker='*',markersize=4)
 cbar = fig.colorbar(qmesh, cax=cax01, orientation="horizontal", ticks=[-0.005,0.0,0.005])
-#cbar = fig.colorbar(qmesh, cax=cax01, orientation="horizontal", ticks=[-0.01,-0.005,0,0.005,0.01])
 cbar.set_label("")
 cbar.set_clim(-0.005,0.005)
 #cbar.ax.xaxis.tick_top()
 #cbar.ax.xaxis.set_label_position("top")
 plt.savefig('figure.png')
 #shutil.copyfile("figure.png", "/mnt/owncloud_webdav/webdav/figure.png")
-#################################
-#################################
-xn=solverb.traveltime.nodes[15:86,0:4,15:86,0].reshape(-1,)
-yn=solverb.traveltime.nodes[15:86,0:4,15:86,1].reshape(-1,)
-zn=solverb.traveltime.nodes[15:86,0:4,15:86,2].reshape(-1,)
-tn=tt0[15:86,0:4,15:86].reshape(-1,)
-rbfi = Rbf(xn,yn,zn,tn)
-#################################
-lhptb  = 0.05000 #(km-order)
-lnptb  = 0.00250 #(km-order)
-lzptb  = 0.00250 #(km-order)
-ghptb  = 0.00001 #(km-order)
-gvptb  = 0.00003 #(km-order)
-#################################
-lknot  = 7.0*1.852
-beta10 = 1.0
-beta15 = 1.5
-beta20 = 2.0
-#################################
-ld     = pd.read_csv('linesample.csv')
-for n in range(len(ld['se'])):
-  lstart = np.array([ld['se'][n],ld['sn'][n],ld['su'][n]])
-  lend   = np.array([ld['ee'][n],ld['en'][n],ld['eu'][n]])
-  line   = lend-lstart
-  kyori  = np.linalg.norm(line)
-  ltime  = int(3600.*kyori/lknot)+30
-  gpe = cn.powerlaw_psd_gaussian(beta15, ltime)
-  gpe = gpe - np.average(gpe)
-  gpn = cn.powerlaw_psd_gaussian(beta15, ltime)
-  gpn = gpn - np.average(gpn)
-  gpu = cn.powerlaw_psd_gaussian(beta15, ltime)
-  gpu = gpu - np.average(gpu)
-  l_e = cn.powerlaw_psd_gaussian(beta20, ltime)
-  l_e = l_e - np.average(l_e)
-  l_n = cn.powerlaw_psd_gaussian(beta20, ltime)
-  l_n = l_n - np.average(l_n)
-  l_z = cn.powerlaw_psd_gaussian(beta10, ltime)
-  l_z = l_z - np.average(l_z)
-#np.savetxt('test_dit.csv',l_h,delimiter=',')
-#################################
-  ang = math.atan2(ld['ee'][n]-ld['se'][n],ld['en'][n]-ld['sn'][n])
-  sewr =                   (np.cos(ang)*lhptb+np.sin(ang)*lnptb)*l_e[::10]+np.linspace(lstart[0],lend[0],len(l_e[::10]))
-  sewn = ghptb*gpe[::10] + sewr
-  snsr =                   (np.sin(ang)*lhptb+np.cos(ang)*lnptb)*l_n[::10]+np.linspace(lstart[1],lend[1],len(l_e[::10]))
-  snsn = ghptb*gpn[::10] + snsr
-  sudr =                                                   lzptb*l_z[::10]+np.linspace(lstart[2],lend[2],len(l_e[::10]))
-  sudn = gvptb*gpu[::10] + sudr
-  sdi = rbfi(sewr, sudr, snsr)
-#################################
-  rewr = sewr + sdi*lknot*(ld['ee'][n]-ld['se'][n])/(3600.*kyori) + (np.cos(ang)*lhptb+np.sin(ang)*lnptb)*l_e[3::10]
-  rewn = ghptb*gpe[3::10]+ rewr
-  rnsr = snsr + sdi*lknot*(ld['en'][n]-ld['sn'][n])/(3600.*kyori) + (np.sin(ang)*lhptb+np.cos(ang)*lnptb)*l_n[3::10]
-  rnsn = ghptb*gpn[3::10]+ rnsr
-  rudr = lzptb*l_z[3::10]+np.linspace(lstart[2],lend[2],len(l_e[::10]))
-  rudn = gvptb*gpu[3::10]+ rudr
-  rdi = rbfi(rewr, rudr, rnsr)
-#################################
-  df = pd.DataFrame({'sEW': sewr,'sNS': snsr,'sUD': sudr,'sEWn': sewn,'sNSn': snsn,'sUDn': sudn,'sTT': sdi,'rEW': rewr,'rNS': rnsr,'rUD': rudr,'rEWn': rewn,'rNSn': rnsn,'rUDn': rudn,'rTT': rdi})
-  df.to_csv('test_li_%s.csv'%(str(n).zfill(2)))

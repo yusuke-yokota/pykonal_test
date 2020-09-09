@@ -23,8 +23,10 @@ sv = pd.read_csv('svpC.csv')
 
 #m_s_dp=[   10,   20,   30]
 #m_s_km=[ 108.0, 0.0,  0.0] # cm/s/km
-m_s_dp=[    9,   21,   30]
-m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
+m_s_dp=[   10,   20,   30]
+m_s_km=[  0.0,  0.0,  0.0] # cm/s/km
+#m_s_dp=[    90,   210,   300]
+#m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
 #m_s_km=[ -50.3, 307.5,  0.0] # cm/s/km
 #m_s_dp=[   15,   24,   30]
@@ -40,9 +42,9 @@ m_s_km=[  0.0, 134.2,  0.0] # cm/s/km
 #m_s_km=[ 307.5,-812.5,  0.0] # cm/s/km
 #m_s_dpB=[   23,   24,   30]
 #m_s_kmB=[ 86.9,-702.0,  0.0] # cm/s/km
-nlat,ndep,nlon=100,50,100#8000,8000,4000
-dlat,ddep,dlon=0.1,0.1,0.1
-slat,sdep,slon=50,30,50
+nlat,ndep,nlon=800,400,800#8000,8000,4000
+dlat,ddep,dlon=0.0125,0.0125,0.0125
+slat,sdep,slon=400,240,400
 solverb = pykonal.EikonalSolver(coord_sys="cartesian")
 solverc = pykonal.EikonalSolver(coord_sys="cartesian")
 
@@ -78,13 +80,13 @@ svp  = [[] for s in range(nlat)]
 for s in range(nlat):
   svc = [[] for i in range(ndep)]
   for i in range(0,m_s_dp[0]):
-    svc[i] = np.array([m_s_km[0]*0.001*0.01*0.1*float(s-50)] * nlon)
+    svc[i] = np.array([m_s_km[0]*0.001*0.01*0.1*float(s-slat)] * nlon)
 #    svc[i] = np.array([0] * nlon)
   for i in range(m_s_dp[0],m_s_dp[1]):
-    svc[i] = np.array([m_s_km[1]*0.001*0.01*0.1*float(s-50)] * nlon)
+    svc[i] = np.array([m_s_km[1]*0.001*0.01*0.1*float(s-slat)] * nlon)
 #    svc[i] = np.array([0] * nlon)
   for i in range(m_s_dp[1],ndep):
-    svc[i] = np.array([m_s_km[2]*0.001*0.01*0.1*float(s-50)] * nlon)
+    svc[i] = np.array([m_s_km[2]*0.001*0.01*0.1*float(s-slat)] * nlon)
 #    svc[i] = np.array([0] * nlon)
   svp[s] = [svc[0]]
   for i in range(1,ndep):
@@ -156,7 +158,7 @@ ax11.contour(
     linestyles="--"
 )
 #print(tt0[:,0,50])
-np.savetxt('centerline.csv',tt0[:,0,50],delimiter=',')
+#np.savetxt('centerline.csv',tt0[:,0,50],delimiter=',')
 #np.savetxt('line1500.csv',tt0[:,0,65],delimiter=',')
 ax11.plot([5, 5], [2, 8], 'w-', lw=2)
 ax11.plot([2, 8], [5, 5], 'w-', lw=2)
@@ -175,19 +177,22 @@ plt.savefig('figure.png')
 #shutil.copyfile("figure.png", "/mnt/owncloud_webdav/webdav/figure.png")
 #################################
 #################################
-xn=solverb.traveltime.nodes[15:86,0:4,15:86,0].reshape(-1,)
-yn=solverb.traveltime.nodes[15:86,0:4,15:86,1].reshape(-1,)
-zn=solverb.traveltime.nodes[15:86,0:4,15:86,2].reshape(-1,)
-tn=tt0[15:86,0:4,15:86].reshape(-1,)
+xn=solverb.traveltime.nodes[15:86,0:1,15:86,0].reshape(-1,)
+yn=solverb.traveltime.nodes[15:86,0:1,15:86,1].reshape(-1,)
+zn=solverb.traveltime.nodes[15:86,0:1,15:86,2].reshape(-1,)
+tn=tt0[15:86,0:1,15:86].reshape(-1,)
+#np.savetxt('test1.csv',tt0[50,0,15:86],delimiter=',')
+np.savetxt('test2.csv',tt0[400,0,120::8],delimiter=',')
+stop
 rbfi = Rbf(xn,yn,zn,tn)
 #################################
-lhptb  = 0.05000 #(km-order)
-lnptb  = 0.00250 #(km-order)
-lzptb  = 0.00250 #(km-order)
-ghptb  = 0.00001 #(km-order)
-gvptb  = 0.00003 #(km-order)
+lhptb  = 0.0 #5000 #(km-order)
+lnptb  = 0.0 #0250 #(km-order)
+lzptb  = 0.0 #0250 #(km-order)
+ghptb  = 0.0 #0001 #(km-order)
+gvptb  = 0.0 #0003 #(km-order)
 #################################
-lknot  = 7.0*1.852
+lknot  = 6.0 #7.0*1.852
 beta10 = 1.0
 beta15 = 1.5
 beta20 = 2.0
