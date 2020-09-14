@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 import shutil,math
+import configparser
 import pandas as pd
 import numpy as np
 import pykonal
@@ -14,18 +15,39 @@ from scipy.interpolate import Rbf
 import colorednoise as cn
 ##
 sv = pd.read_csv('svpC.csv')
+icfg = configparser.ConfigParser()
+icfg.read('Settings.ini', 'UTF-8')
 ##
-# Initialize the solver.######
+#################################
 ##Input parameters start #####
-m_s_dp=[  10,  20,  30]
-m_s_km=[  0.0, 0.0,  0.0] # cm/s/km
-nlon,ndep,nlat=201,101,201#8000,8000,4000
-dlon,ddep,dlat=0.010,0.010,0.010
-slon,sdep,slat=100,100,100
-#nlon,ndep,nlat=400,201,400#8000,8000,4000
-#dlon,ddep,dlat=0.005,0.005,0.005
-#slon,sdep,slat=200,200,200
+# GNSS noise ######
+ghptb = icfg.get("HyperParameters", "Ghptb")
+gvptb = icfg.get("HyperParameters", "Gvptb")
+knot  = icfg.get("HyperParameters", "Knot")
+lknot  = float(knot)*1.852
+lhptb = icfg.get("HyperParameters", "Leptb")
+lnptb = icfg.get("HyperParameters", "Lnptb")
+luptb = icfg.get("HyperParameters", "Luptb")
+ghptb,gvptb,lhptb,lnptb,luptb  = float(ghptb), float(gvptb),float(lhptb),float(lnptb),float(luptb)
+# node setting ####
+nlon  = icfg.get("HyperParameters", "NodeLon")
+ndep  = icfg.get("HyperParameters", "NodeDep")
+nlat  = icfg.get("HyperParameters", "NodeLat")
+dlon  = icfg.get("HyperParameters", "DnodLon")
+ddep  = icfg.get("HyperParameters", "DnodDep")
+dlat  = icfg.get("HyperParameters", "DnodLat")
+slon  = icfg.get("HyperParameters", "SrceLon")
+sdep  = icfg.get("HyperParameters", "SrceDep")
+slat  = icfg.get("HyperParameters", "SrceLat")
+nlon,ndep,nlat,dlon,ddep,dlat,slon,sdep,slat  = int(nlon),int(ndep),int(nlat),float(dlon),float(ddep),float(dlat),int(slon),int(sdep),int(slat)
+# gradient setting ####
+m_s_dp = icfg.get("HyperParameters", "Nod_cut").split()
+m_s_km = icfg.get("HyperParameters", "Vel_cut").split()
+m_s_dp = np.array(list(map(int, m_s_dp)))
+m_s_km = np.array(list(map(float, m_s_km)))
 ##Input parameters  end  #####
+#################################
+##Initialize the solver. #####
 ##############################
 slon1,sdep1,slat1=slon,    sdep,int(slat*1.5)
 slon2,sdep2,slat2=int(slon*1.5),sdep,slat
@@ -244,17 +266,17 @@ cbar.set_clim(-1.,1.)
 #cbar.ax.xaxis.set_label_position("top")
 plt.savefig('figure.png')
 #################################
-#################################
-lhptb  = 0.0 #5000 #(km-order)
-lnptb  = 0.0 #0250 #(km-order)
-lzptb  = 0.0 #0250 #(km-order)
-ghptb  = 0.0 #0001 #(km-order)
-gvptb  = 0.0 #0003 #(km-order)
-#################################
-lknot  = 7.0*1.852
 beta10 = 1.0
 beta15 = 1.5
 beta20 = 2.0
+#################################
+ltime  = 43200 # int(3600.*kyori/lknot)
+gpe = cn.powerlaw_psd_gaussian(beta15, ltime)
+gpe = ghptb * (gpe - np.average(gpe))
+gpn = cn.powerlaw_psd_gaussian(beta15, ltime)
+gpn = ghptb * (gpn - np.average(gpn))
+gpu = cn.powerlaw_psd_gaussian(beta15, ltime)
+gpu = gvptb * (gpu - np.average(gpu))
 #################################
 ld     = pd.read_csv('linesample.csv')
 da     = [[[] for j in range(13)] for i in range(len(ld['se']))]
@@ -263,13 +285,6 @@ for n in range(len(ld['se'])):
   lend   = np.array([int(ld['ee'][n]*sdep),int(ld['en'][n]*sdep),0])
   line   = (lend-lstart)/sdep
   kyori  = np.linalg.norm(line)
-#  ltime  = int(3600.*kyori/lknot)+30
-#  gpe = cn.powerlaw_psd_gaussian(beta15, ltime)
-#  gpe = gpe - np.average(gpe)
-#  gpn = cn.powerlaw_psd_gaussian(beta15, ltime)
-#  gpn = gpn - np.average(gpn)
-#  gpu = cn.powerlaw_psd_gaussian(beta15, ltime)
-#  gpu = gpu - np.average(gpu)
 #  l_e = cn.powerlaw_psd_gaussian(beta20, ltime)
 #  l_e = l_e - np.average(l_e)
 #  l_n = cn.powerlaw_psd_gaussian(beta20, ltime)
@@ -311,27 +326,48 @@ for n in range(len(ld['se'])):
   sdi  = np.concatenate([sdi, sdi3[2::4]], 0)
   sdi  = np.concatenate([sdi, sdi4[3::4]], 0)
   sudr = sudr1
-  sewn = sewr+0.
-  snsn = snsr+0.
-  sudn = sudr+0.
+  sewn  = np.linspace(0, 10, ld['shot'][n])
+  snsn  = np.linspace(0, 10, ld['shot'][n])
+  sudn  = np.linspace(0, 10, ld['shot'][n])
+  for i in range(len(sewr)):
+    sewn[i] = sewr[i]+gpe[int(stim[i]-stim[0])]
+    snsn[i] = snsr[i]+gpn[int(stim[i]-stim[0])]
+    sudn[i] = sudr[i]+gpu[int(stim[i]-stim[0])]
   rtim = stim
   rewr = sewr
   rnsr = snsr
   rudr = sudr
-  rewn = rewr+0.
-  rnsn = rnsr+0.
-  rudn = rudr+0.
+  rewn = sewn
+  rnsn = snsn
+  rudn = sudn
   rdi  = sdi
+  din1  = np.linspace(0, 10, ld['shot'][n])
+  din2  = np.linspace(0, 10, ld['shot'][n])
+  din3  = np.linspace(0, 10, ld['shot'][n])
+  din4  = np.linspace(0, 10, ld['shot'][n])
+  for i in range(ld['shot'][n]):
+    nin = int(lstart[0]+i*(lend[0]-lstart[0])/ld['shot'][n])
+    nie = int(lstart[1]+i*(lend[1]-lstart[1])/ld['shot'][n])
+    din1[i]  = (np.sqrt((sewn[i]-solverc1.velocity.nodes[slon1,sdep1,slat1,0])**2 + (snsn[i]-solverc1.velocity.nodes[slon1,sdep1,slat1,2])**2 + (sudn[i]-solverc1.velocity.nodes[slon1,sdep1,slat1,1])**2) - np.sqrt((sewr[i]-solverc1.velocity.nodes[slon1,sdep1,slat1,0])**2 + (snsr[i]-solverc1.velocity.nodes[slon1,sdep1,slat1,2])**2 + (sudr[i]-solverc1.velocity.nodes[slon1,sdep1,slat1,1])**2)) / solverc1.velocity.values[nin,0,nie]
+    din2[i]  = (np.sqrt((sewn[i]-solverc2.velocity.nodes[slon2,sdep2,slat2,0])**2 + (snsn[i]-solverc2.velocity.nodes[slon2,sdep2,slat2,2])**2 + (sudn[i]-solverc2.velocity.nodes[slon2,sdep2,slat2,1])**2) - np.sqrt((sewr[i]-solverc2.velocity.nodes[slon2,sdep2,slat2,0])**2 + (snsr[i]-solverc2.velocity.nodes[slon2,sdep2,slat2,2])**2 + (sudr[i]-solverc2.velocity.nodes[slon2,sdep2,slat2,1])**2)) / solverc2.velocity.values[nin,0,nie]
+    din3[i]  = (np.sqrt((sewn[i]-solverc3.velocity.nodes[slon3,sdep3,slat3,0])**2 + (snsn[i]-solverc3.velocity.nodes[slon3,sdep3,slat3,2])**2 + (sudn[i]-solverc3.velocity.nodes[slon3,sdep3,slat3,1])**2) - np.sqrt((sewr[i]-solverc3.velocity.nodes[slon3,sdep3,slat3,0])**2 + (snsr[i]-solverc3.velocity.nodes[slon3,sdep3,slat3,2])**2 + (sudr[i]-solverc3.velocity.nodes[slon3,sdep3,slat3,1])**2)) / solverc3.velocity.values[nin,0,nie]
+    din4[i]  = (np.sqrt((sewn[i]-solverc4.velocity.nodes[slon4,sdep4,slat4,0])**2 + (snsn[i]-solverc4.velocity.nodes[slon4,sdep4,slat4,2])**2 + (sudn[i]-solverc4.velocity.nodes[slon4,sdep4,slat4,1])**2) - np.sqrt((sewr[i]-solverc4.velocity.nodes[slon4,sdep4,slat4,0])**2 + (snsr[i]-solverc4.velocity.nodes[slon4,sdep4,slat4,2])**2 + (sudr[i]-solverc4.velocity.nodes[slon4,sdep4,slat4,1])**2)) / solverc4.velocity.values[nin,0,nie]
   da[n][0] = np.full(len(sewr),"S%s"%(str(ld['set'][n]).zfill(2)))
   da[n][1] = np.full(len(sewr),"L%s"%(str(n+1).zfill(2)))
   da[n][2] = np.full(len(sewr),"M01")
+  da[n][3] = sdi + rdi
+  for i in range(0,len(sewr1[0::4])):
+#    da[n][2][i] = "M01"
+    da[n][3][i] = da[n][3][i] + 2.*din1[i]
   for i in range(len(sewr1[0::4]),len(sewr1[0::4])+len(sewr1[1::4])):
     da[n][2][i] = "M02"
+    da[n][3][i] = da[n][3][i] + 2.*din2[i]
   for i in range(len(sewr1[0::4])+len(sewr1[1::4]),len(sewr1[0::4])+len(sewr1[1::4])+len(sewr1[2::4])):
     da[n][2][i] = "M03"
+    da[n][3][i] = da[n][3][i] + 2.*din3[i]
   for i in range(len(sewr1[0::4])+len(sewr1[1::4])+len(sewr1[2::4]),len(sewr)):
     da[n][2][i] = "M04"
-  da[n][3] = sdi + rdi
+    da[n][3][i] = da[n][3][i] + 2.*din4[i]
   da[n][4] = stim
   da[n][5] = sewr
   da[n][6] = snsr
