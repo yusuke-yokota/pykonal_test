@@ -330,9 +330,9 @@ for n in range(len(ld['se'])):
   snsn  = np.linspace(0, 10, ld['shot'][n])
   sudn  = np.linspace(0, 10, ld['shot'][n])
   for i in range(len(sewr)):
-    sewn[i] = sewr[i]+gpe[int(stim[i]-stim[0])]
-    snsn[i] = snsr[i]+gpn[int(stim[i]-stim[0])]
-    sudn[i] = sudr[i]+gpu[int(stim[i]-stim[0])]
+    sewn[i] = sewr[i]+gpe[int(stim[i])]
+    snsn[i] = snsr[i]+gpn[int(stim[i])]
+    sudn[i] = sudr[i]+gpu[int(stim[i])]
   rtim = stim
   rewr = sewr
   rnsr = snsr
