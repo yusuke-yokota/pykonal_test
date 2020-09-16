@@ -12,6 +12,7 @@ import numpy as np
 import pykonal
 import os,time,sys
 from scipy.interpolate import Rbf
+from scipy.special import eval_chebyt
 import colorednoise as cn
 ##
 sv = pd.read_csv('svpC.csv')
@@ -28,7 +29,7 @@ lknot  = float(knot)*1.852
 lhptb = icfg.get("HyperParameters", "Leptb")
 lnptb = icfg.get("HyperParameters", "Lnptb")
 luptb = icfg.get("HyperParameters", "Luptb")
-ghptb,gvptb,lhptb,lnptb,luptb  = float(ghptb), float(gvptb),float(lhptb),float(lnptb),float(luptb)
+ghptb,gvptb,lhptb,lnptb,luptb = float(ghptb),float(gvptb),float(lhptb),float(lnptb),float(luptb)
 # node setting ####
 nlon  = icfg.get("HyperParameters", "NodeLon")
 ndep  = icfg.get("HyperParameters", "NodeDep")
@@ -39,20 +40,26 @@ dlat  = icfg.get("HyperParameters", "DnodLat")
 slon  = icfg.get("HyperParameters", "SrceLon")
 sdep  = icfg.get("HyperParameters", "SrceDep")
 slat  = icfg.get("HyperParameters", "SrceLat")
-nlon,ndep,nlat,dlon,ddep,dlat,slon,sdep,slat  = int(nlon),int(ndep),int(nlat),float(dlon),float(ddep),float(dlat),int(slon),int(sdep),int(slat)
+asiz  = icfg.get("HyperParameters", "ArraSiz")
+nlon,ndep,nlat,dlon,ddep,dlat,slon,sdep,slat,asiz = int(nlon),int(ndep),int(nlat),float(dlon),float(ddep),float(dlat),int(slon),int(sdep),int(slat),int(asiz)
 # gradient setting ####
 m_s_dp = icfg.get("HyperParameters", "Nod_cut").split()
 m_s_km = icfg.get("HyperParameters", "Vel_cut").split()
+o_chet = icfg.get("HyperParameters", "O_Chebyt")
+c_chet = icfg.get("HyperParameters", "Chebyt").split()
+d_chet = icfg.get("HyperParameters", "D_Chebyt")
 m_s_dp = np.array(list(map(int, m_s_dp)))
 m_s_km = np.array(list(map(float, m_s_km)))
+c_chet = np.array(list(map(float, c_chet)))
+o_chet,d_chet = int(o_chet),float(d_chet)
 ##Input parameters  end  #####
 #################################
 ##Initialize the solver. #####
 ##############################
-slon1,sdep1,slat1=slon,    sdep,int(slat*1.5)
-slon2,sdep2,slat2=int(slon*1.5),sdep,slat
-slon3,sdep3,slat3=slon,    sdep,int(slat*0.5)
-slon4,sdep4,slat4=int(slon*0.5),sdep,slat
+slon1,sdep1,slat1=slon,     sdep,slat+asiz
+slon2,sdep2,slat2=slon+asiz,sdep,slat
+slon3,sdep3,slat3=slon,     sdep,slat-asiz
+slon4,sdep4,slat4=slon-asiz,sdep,slat
 ##############################
 tsv=0.
 ai=0
@@ -113,14 +120,23 @@ o0 = np.array([svpo] * nlon)
 a0 = np.array([svp] * nlon)
 ########## com model
 svp  = [[] for s in range(nlon)]
+chet = np.arange(o_chet+1, dtype=float)
 for s in range(nlon):
+  achet=0
+  for c in range(o_chet+1):
+    chet[c] = eval_chebyt(c, (s-slon)/slon)
+    achet = c_chet[c]*chet[c] + achet
+  achet = achet/d_chet
   svc = [[] for i in range(ndep)]
   for i in range(0,m_s_dp[0]):
-    svc[i] = np.array([m_s_km[0]*0.001*0.1*(1./float(2*slon))*float(s-slon)] * nlat)
+    svc[i] = np.array([m_s_km[0]*0.001*0.1*0.5*achet] * nlat)
+#    svc[i] = np.array([m_s_km[0]*0.001*0.1*(1./float(2*slon))*float(s-slon)] * nlat)
   for i in range(m_s_dp[0],m_s_dp[1]):
-    svc[i] = np.array([m_s_km[1]*0.001*0.1*(1./float(2*slon))*float(s-slon)] * nlat)
+    svc[i] = np.array([m_s_km[1]*0.001*0.1*0.5*achet] * nlat)
+#    svc[i] = np.array([m_s_km[1]*0.001*0.1*(1./float(2*slon))*float(s-slon)] * nlat)
   for i in range(m_s_dp[1],ndep):
-    svc[i] = np.array([m_s_km[2]*0.001*0.1*(1./float(2*slon))*float(s-slon)] * nlat)
+    svc[i] = np.array([m_s_km[2]*0.001*0.1*0.5*achet] * nlat)
+#    svc[i] = np.array([m_s_km[2]*0.001*0.1*(1./float(2*slon))*float(s-slon)] * nlat)
   svp[s] = [svc[0]]
   for i in range(1,ndep):
     svp[s] = np.append(svp[s], [svc[i]], axis=0)
