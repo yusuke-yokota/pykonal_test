@@ -18,15 +18,18 @@ irunfix=true
 
 for site in ${sitelist}
 do
-	for f1 in `ls ./initcfg/${site}/${site}.[0-1][0-9]*.*yo*initcfg.ini`
+	f1911="initcfg/${site}/${site}.1911.kaiyo_k4-initcfg.ini"
+	for obs in `ls ./obsdata/${site}/${site}.[2-9]0*.*yo*obs.csv`
+#	for f1 in `ls ./initcfg/${site}/${site}.[2-9][0-9]*.*yo*initcfg.ini`
 	do
-		bn=`basename $f1`
-		obs="obsdata/${site}/${bn/initcfg.ini}obs.csv"
+		bn=`basename $obs`
+		f1="initcfg/${site}/${bn/obs.csv}initcfg.ini"
+#		obs="obsdata/${site}/${bn/initcfg.ini}obs.csv"
 		./demo.py -i $finiprep -f $f1 -d demo_prep/$site --maxcore 1
 	done
-	cp demo_prep/IMAG/IMAG.1911.kaiyo_k4-res.dat demo_prep/IMAG/IMAG.1910.kaiyo_k4-res.dat
+#	cp demo_prep/IMAG/IMAG.1911.kaiyo_k4-res.dat demo_prep/IMAG/IMAG.1910.kaiyo_k4-res.dat
 	./makeFixCfg.py -d cfgfix --res_singles "demo_prep/${site}/*res.dat"
-	for f2 in `ls ./initcfg/${site}/${site}.[0-1][0-9]*.*yo*initcfg.ini`
+	for f2 in `ls ./initcfg/${site}/${site}.[2-9]0*.*yo*initcfg.ini`
 	do
 		bn=`basename $f2`
 		cfgfix_ini="cfgfix/${site}/${bn/initcfg.ini}fix.ini"

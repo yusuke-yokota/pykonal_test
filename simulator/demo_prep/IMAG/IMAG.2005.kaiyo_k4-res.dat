@@ -1,0 +1,38 @@
+[Obs-parameter] 
+ Site_name   = IMAG
+ Campaign    = 2005.kaiyo_k4
+ Date(UTC)   = 2019-11-10
+ Date(jday)  = 2019-314
+ Ref.Frame   = ITRF2014
+ SoundSpeed  = ./obsdata/IMAG/IMAG.1911.kaiyo_k4-svp.csv
+
+[Data-file]
+ datacsv     = demo_prep/IMAG/IMAG.2005.kaiyo_k4-obs.csv
+ N_shot      =   720
+ used_shot   =   720
+
+[Site-parameter]
+ Latitude0   =   0.00000000
+ Longitude0  =   0.00000000
+ Height0     =   0.00
+ Stations    = M01 M02 M03 M04
+# Array_cent :   'cntpos_E'  'cntpos_N'  'cntpos_U'
+ Center_ENU  =     -0.0022      0.0017   -999.9826
+
+[Model-parameter]
+# MT_Pos     :   'stapos_E'  'stapos_N'  'stapos_U'   'sigma_E'   'sigma_N'   'sigma_U'   'cov_NU'    'cov_UE'    'cov_EN'
+ M01_dPos    =     -0.0015    499.9904   -999.9842      0.0066      0.0062      0.0066   3.455e-06   4.929e-07  -1.064e-06
+ M02_dPos    =    499.9833      0.0004   -999.9828      0.0064      0.0066      0.0065  -4.011e-07   3.970e-06  -1.179e-06
+ M03_dPos    =     -0.0020   -499.9865   -999.9802      0.0068      0.0063      0.0065  -2.940e-06   8.757e-07   1.227e-07
+ M04_dPos    =   -499.9885      0.0028   -999.9830      0.0065      0.0066      0.0064   8.736e-08  -2.465e-06  -9.205e-08
+ dCentPos    =      0.0000      0.0000      0.0000      0.0000      0.0000      0.0000   0.000e+00   0.000e+00   0.000e+00
+# TD_to_ANT  :      'right'   'forward'    'upward'   'sigma_R'   'sigma_F'   'sigma_U'   'cov_FU'    'cov_UR'    'cov_RF'
+ ATDoffset   =      0.0000      0.0000      0.0000      0.0000      0.0000      0.0000   0.000e+00   0.000e+00   0.000e+00
+
+#Inversion-type 2 Loop  1- 1, RMS(TT) =   0.017120 ms, used_shot = 100.0%, reject =    0, Max(dX) =     0.2722, Hgt =   -999.983
+#Inversion-type 2 Loop  1- 2, RMS(TT) =   0.017120 ms, used_shot = 100.0%, reject =    0, Max(dX) =     0.0000, Hgt =   -999.983
+#  ABIC =        2026.536096  misfit =  0.002 
+# lambda_0^2 =   0.10000000
+# lambda_g^2 =   0.01000000
+# sigma_t =   0.00000000 sec.
+# sigma_m = 0.5000
