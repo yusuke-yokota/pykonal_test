@@ -28,7 +28,7 @@ Please report bugs, feature requests, and questions through the [Issues](https:/
 3. Path_fig1.py: 音響パスの計算（震源と受信点を拘束するのは難しく,まだできていない）
 4. VV.py: 傾斜パラメータが与えられるときの場(屈折非考慮)を計算する（横田，2019，海洋音響学会誌）
 5. mksvp.py: SVモデル作成用
-6. Simulator_addNoise.py: GARPOSでのシミュレータ用，実行方法は下記
+6. Simulator_*: GARPOSでのシミュレータ用，実行方法は下記
 
 ## Simulator
 ```bash
