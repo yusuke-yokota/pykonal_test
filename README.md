@@ -39,15 +39,15 @@ sh$> sh job.sh
 sh$> (sh bat_mkfig.sh)
 ```
 
-###Simulator_3D
+### Simulator_3D
 1. 用意するファイル：svpC.csv 基本となる音速度ファイル（1500m/s均質で良い），Settings.ini セッティングファイル（詳しくは本体を見て下さい），linsample.csv 測線とデータ頻度を与える
 2. 出てくるファイル：IMAG.1911.kaiyo_k4-obs.csv GARPOS用データファイル，IMAG.1911.kaiyo_k4-initcfg.ini GARPOS用cfgファイル
 
-###Simulator_addNoise
+### Simulator_addNoise
 1. 3D実施後同一階層で実行
 2. 出てくるファイル：IMAG.${DAY}.kaiyo_k4-obs.csv ノイズ付与GARPOS用データファイル（ノイズ設定はSettings.ini），IMAG.${DAY}.kaiyo_k4-initcfg.ini GARPOS用cfgファイル
 
-###job.sh & bat_mkfig.sh
+### job.sh & bat_mkfig.sh
 1. GARPOS用のフォルダならどこでも良い．データとcfgを正しく設置する
 2. demo.py (singleとfix)を通常通り回す > 初期設定ではdemo_prep/とdemo_res/に結果
 3. bat_mkfig.shで作図
