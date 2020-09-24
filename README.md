@@ -1,7 +1,10 @@
 # pykonal_test
-This code was modified by PyKonal, the Fast Marching Method (FMM; Sethian, 1996) for solving the eikonal equation in Cartesian or spherical coordinates in 2 or 3 dimensions. The method implements mixed first- and second-order finite differences.
+This code was modified by PyKonal, the Fast Marching Method (FMM; Sethian, 1996 & White et al., 2020)  for calculate GNSS-A sound speed structure in order to solve the eikonal equation in Cartesian or spherical coordinates in 2 or 3 dimensions. The method implements mixed first- and second-order finite differences.
+Using this code, we can calculate GNSS-A scale sound speed structure and GNSS-A data for simulation using GARPOS (Watanabe et al., 2020, https://zenodo.org/record/3992688#.X2xN4Xn7QuV).
+
 ## Citation
-If you make use of this code in published work, please cite White *et al.* (2020).
+If you make use of this code in published work, please cite Sethian (1996) & White *et al.* (2020).
+Citation of this simulation code itself is in preparation.
 
 ## Installation
 https://malcolmw.github.io/pykonal-docs/installation.html
@@ -19,8 +22,6 @@ sh$> pip install cython>=0.29.14 h5py numpy scipy
 sh$> cd path/to/pykonal
 sh$> pip install .
 ```
-## Bugs
-Please report bugs, feature requests, and questions through the [Issues](https://github.com/malcolmw/pykonal/issues "PyKonal Issues tracker") tracker.
 
 ## Py for GNSS-A
 1. Cartesian_3Dfig3.py: 直交座標系の音響伝播計算
