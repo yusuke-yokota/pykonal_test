@@ -388,8 +388,36 @@ for epi in range(1):
   df = df.reset_index()
   df = df.drop('index',axis=1)
   df = df.round({'TT': 6, 'ST': 6, 'ant_e0': 5, 'ant_n0': 5, 'ant_u0': 5, 'RT': 6, 'ant_e1': 5, 'ant_n1': 5, 'ant_u1': 5})
-  of='~/sgobs/garpos/simulator/obsdata/IMAG/IMAG.1911.kaiyo_k4-obs.csv'
+  of='/home/sgo/sgobs/garpos/simulator/obsdata/IMAG/IMAG.1911.kaiyo_k4-obs.csv'
   cfgfile='./initcfg/IMAG/IMAG.1911.kaiyo_k4-initcfg.ini'
   hd = "# cfgfile = %s\n" % cfgfile
-  df.to_csv(of)
-  os.system('sed -i -e "1i ' + hd + '" ' + of )
+  outf = open(of,"w")
+  outf.write(hd)
+  outf.close()
+  df.to_csv(of,mode='a')
+
+s01=solverc1.velocity.nodes[slon1,sdep1,slat1,0]
+s02=solverc1.velocity.nodes[slon1,sdep1,slat1,2]
+s03=solverc1.velocity.nodes[slon1,sdep1,slat1,1]
+s11=solverc2.velocity.nodes[slon2,sdep2,slat2,0]
+s12=solverc2.velocity.nodes[slon2,sdep2,slat2,2]
+s13=solverc2.velocity.nodes[slon2,sdep2,slat2,1]
+s21=solverc3.velocity.nodes[slon3,sdep3,slat3,0]
+s22=solverc3.velocity.nodes[slon3,sdep3,slat3,2]
+s23=solverc3.velocity.nodes[slon3,sdep3,slat3,1]
+s31=solverc4.velocity.nodes[slon4,sdep4,slat4,0]
+s32=solverc4.velocity.nodes[slon4,sdep4,slat4,2]
+s33=solverc4.velocity.nodes[slon4,sdep4,slat4,1]
+a1=a0+a1
+dd = [] #[] for i in range(len(df))]
+for i in range(len(df)):
+  nin = int(df.ant_n0[i]*1.e-3/dlat)
+  nie = int(df.ant_e0[i]*1.e-3/dlon)
+  dd.append(a1[nin,0,nie])
+sdf = pd.DataFrame({'s01': s01,'s02': s02,'s03': s03,'s11': s11,'s12': s12,'s13': s13,'s21': s21,'s22': s22,'s23': s23,'s31': s31,'s32': s32,'s33': s33,'dd': dd})
+cfifile='/home/sgo/sgobs/garpos/simulator/initcfg/IMAG/IMAG.1911.kaiyo_k4-noise.ini'
+hd = "# cfgfile = %s\n" % cfgfile
+outf = open(cfifile,"w")
+outf.write(hd)
+outf.close()
+sdf.to_csv(cfifile,mode='a')

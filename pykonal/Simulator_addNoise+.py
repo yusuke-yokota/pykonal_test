@@ -173,16 +173,16 @@ dkf.ant_n0 = dkf.ant_n0/1.e3
 dkf.ant_u0 = dkf.ant_u0/1.e3
 for epi in range(sample):
   gpserr = cn.powerlaw_psd_gaussian(beta15, 3*ltime)
-  gpe = ghptb * (gpserr[       :  ltime] - np.average(gpserr[       :  ltime]))
-  gpn = ghptb * (gpserr[  ltime:2*ltime] - np.average(gpserr[  ltime:2*ltime]))
-  gpu = gvptb * (gpserr[2*ltime:3*ltime] - np.average(gpserr[2*ltime:3*ltime]))
+  gpe = ghptb * (gpserr[       :  ltime]) # - np.average(gpserr[       :  ltime]))
+  gpn = ghptb * (gpserr[  ltime:2*ltime]) # - np.average(gpserr[  ltime:2*ltime]))
+  gpu = gvptb * (gpserr[2*ltime:3*ltime]) # - np.average(gpserr[2*ltime:3*ltime]))
 #################################
   for i in range(len(dkf)):
     dkf.ant_e1[i] = dkf.ant_e0[i]+gpe[int(dkf.ST[i])]
     dkf.ant_n1[i] = dkf.ant_n0[i]+gpn[int(dkf.ST[i])]
     dkf.ant_u1[i] = dkf.ant_u0[i]+gpu[int(dkf.ST[i])]
-    nin = int(df.ant_n0[i]/dlat)
-    nie = int(df.ant_e0[i]/dlon)
+    nin = int(dkf.ant_n0[i]/dlat)
+    nie = int(dkf.ant_e0[i]/dlon)
     if dkf.MT[i] == 'M01':
       dkf.ResiTT[i] = dkf.TT[i] + 2.*(np.sqrt((dkf.ant_e1[i]-s01)**2 + (dkf.ant_n1[i]-s02)**2 + (dkf.ant_u1[i]-s03)**2) - np.sqrt((dkf.ant_e0[i]-s01)**2 + (dkf.ant_n0[i]-s02)**2 + (dkf.ant_u0[i]-s03)**2)) / a1[nin,0,nie]
     elif dkf.MT[i] == 'M02':
