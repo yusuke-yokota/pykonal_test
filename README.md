@@ -33,8 +33,9 @@ sh$> pip install .
 
 ## Simulator
 ```bash
-sh$> Simulator_3Dfig9.py
-sh$> Simulator_addNoise.py
+sh$> Simulator_3D_v2.py
+sh$> Simulator_addNoise2b.py
+sh$> Simulator_addNoise2c.py
 sh$> cd **/simulator
 sh$> sh job.sh
 sh$> (sh bat_mkfig.sh)
@@ -42,9 +43,13 @@ sh$> (sh bat_mkfig.sh)
 
 ### Simulator_3D
 1. 用意するファイル：svpC.csv 基本となる音速度ファイル（1500m/s均質で良い），Settings.ini セッティングファイル（詳しくは本体を見て下さい），linsample.csv 測線とデータ頻度を与える
-2. 出てくるファイル：IMAG.1911.kaiyo_k4-obs.csv GARPOS用データファイル，IMAG.1911.kaiyo_k4-initcfg.ini GARPOS用cfgファイル
+2. 出てくるファイル：IMAG.1911.kaiyo_k4-obs.csv ノイズなしGARPOS用データファイル，IMAG.1911.kaiyo_k4-initcfg.ini GARPOS用cfgファイル，IMAG.1911.kaiyo_k4-noise.ini addNoise2cでノイズ取得の際に震源位置を受け渡すためのファイル
 
-### Simulator_addNoise
+### Simulator_addNoise2b
+1. 3D実施後同一階層で実行
+2. 出てくるファイル：NUMBER.noise あとで乗っているノイズがわかるようにノイズを残す（2bを大量に回しておけばv2と2cだけを回せば良い）
+
+### Simulator_addNoise2c
 1. 3D実施後同一階層で実行
 2. 出てくるファイル：IMAG.${DAY}.kaiyo_k4-obs.csv ノイズ付与GARPOS用データファイル（ノイズ設定はSettings.ini），IMAG.${DAY}.kaiyo_k4-initcfg.ini GARPOS用cfgファイル
 

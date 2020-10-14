@@ -8,8 +8,8 @@
 
 [Data-file]
  datacsv     = demo_prep/IMAG/IMAG.2002.kaiyo_k4-obs.csv
- N_shot      =   720
- used_shot   =   720
+ N_shot      =   360
+ used_shot   =   360
 
 [Site-parameter]
  Latitude0   =   0.00000000
@@ -17,21 +17,21 @@
  Height0     =   0.00
  Stations    = M01 M02 M03 M04
 # Array_cent :   'cntpos_E'  'cntpos_N'  'cntpos_U'
- Center_ENU  =     -0.0053     -0.0099  -1000.0126
+ Center_ENU  =      0.0224      0.0078  -1000.0038
 
 [Model-parameter]
 # MT_Pos     :   'stapos_E'  'stapos_N'  'stapos_U'   'sigma_E'   'sigma_N'   'sigma_U'   'cov_NU'    'cov_UE'    'cov_EN'
- M01_dPos    =     -0.0033    500.0036  -1000.0271      0.0087      0.0082      0.0086   5.925e-06   8.462e-07  -1.824e-06
- M02_dPos    =    500.0081     -0.0097  -1000.0147      0.0084      0.0087      0.0085  -6.863e-07   6.808e-06  -2.021e-06
- M03_dPos    =     -0.0087   -500.0172   -999.9990      0.0088      0.0082      0.0086  -5.041e-06   1.500e-06   2.111e-07
- M04_dPos    =   -500.0174     -0.0161  -1000.0096      0.0085      0.0087      0.0084   1.478e-07  -4.228e-06  -1.578e-07
+ M01_dPos    =      0.0307    500.0025   -999.9905      0.0098      0.0088      0.0093   1.120e-05   9.195e-07  -2.196e-06
+ M02_dPos    =    500.0217      0.0113   -999.9795      0.0091      0.0096      0.0092  -2.720e-07   1.020e-05  -3.254e-06
+ M03_dPos    =      0.0269   -499.9937  -1000.0201      0.0096      0.0090      0.0093  -7.455e-06   1.856e-06  -2.455e-06
+ M04_dPos    =   -499.9899      0.0110  -1000.0251      0.0094      0.0096      0.0091   9.312e-07  -6.782e-06  -2.536e-06
  dCentPos    =      0.0000      0.0000      0.0000      0.0000      0.0000      0.0000   0.000e+00   0.000e+00   0.000e+00
 # TD_to_ANT  :      'right'   'forward'    'upward'   'sigma_R'   'sigma_F'   'sigma_U'   'cov_FU'    'cov_UR'    'cov_RF'
  ATDoffset   =      0.0000      0.0000      0.0000      0.0000      0.0000      0.0000   0.000e+00   0.000e+00   0.000e+00
 
-#Inversion-type 2 Loop  1- 1, RMS(TT) =   0.022156 ms, used_shot = 100.0%, reject =    0, Max(dX) =     0.7510, Hgt =  -1000.013
-#Inversion-type 2 Loop  1- 2, RMS(TT) =   0.022156 ms, used_shot = 100.0%, reject =    0, Max(dX) =     0.0000, Hgt =  -1000.013
-#  ABIC =        2409.350291  misfit =  0.004 
+#Inversion-type 2 Loop  1- 1, RMS(TT) =   0.017663 ms, used_shot = 100.0%, reject =    0, Max(dX) =     0.3645, Hgt =  -1000.004
+#Inversion-type 2 Loop  1- 2, RMS(TT) =   0.017663 ms, used_shot = 100.0%, reject =    0, Max(dX) =     0.0000, Hgt =  -1000.004
+#  ABIC =         826.949209  misfit =  0.002 
 # lambda_0^2 =   0.10000000
 # lambda_g^2 =   0.01000000
 # sigma_t =   0.00000000 sec.

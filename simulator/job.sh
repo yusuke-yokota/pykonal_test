@@ -19,7 +19,7 @@ irunfix=true
 for site in ${sitelist}
 do
 	f1911="initcfg/${site}/${site}.1911.kaiyo_k4-initcfg.ini"
-	for obs in `ls ./obsdata/${site}/${site}.[2-9]0*.*yo*obs.csv`
+	for obs in `ls ./obsdata/${site}/${site}.2001.*yo*obs.csv`
 #	for f1 in `ls ./initcfg/${site}/${site}.[2-9][0-9]*.*yo*initcfg.ini`
 	do
 		bn=`basename $obs`
@@ -29,7 +29,7 @@ do
 	done
 #	cp demo_prep/IMAG/IMAG.1911.kaiyo_k4-res.dat demo_prep/IMAG/IMAG.1910.kaiyo_k4-res.dat
 	./makeFixCfg.py -d cfgfix --res_singles "demo_prep/${site}/*res.dat"
-	for f2 in `ls ./initcfg/${site}/${site}.[2-9]0*.*yo*initcfg.ini`
+	for f2 in `ls ./initcfg/${site}/${site}.2001.*yo*initcfg.ini`
 	do
 		bn=`basename $f2`
 		cfgfix_ini="cfgfix/${site}/${bn/initcfg.ini}fix.ini"
@@ -37,4 +37,4 @@ do
 	done
 	
 done
-./bat_mkfig.sh
+#./bat_mkfig.sh

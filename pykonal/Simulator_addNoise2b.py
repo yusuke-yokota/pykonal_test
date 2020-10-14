@@ -21,8 +21,6 @@ icfg.read('Settings.ini', 'UTF-8')
 ld = pd.read_csv('linesample.csv')
 kf='~/sgobs/garpos/simulator/obsdata/IMAG/IMAG.1911.kaiyo_k4-obs.csv'
 dkf = pd.read_csv(kf,comment='#')
-sf='~/sgobs/garpos/simulator/initcfg/IMAG/IMAG.1911.kaiyo_k4-noise.ini'
-skf = pd.read_csv(sf,comment='#')
 ##
 #################################
 ##Input parameters start #####
